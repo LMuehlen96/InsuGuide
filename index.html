@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsuGuide</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233b82f6'/%3E%3Cstop offset='1' stop-color='%231d4ed8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Cpath d='M50 20 C50 20 73 46 73 63 A23 23 0 1 1 27 63 C27 46 50 20 50 20 Z' fill='white'/%3E%3Cpath d='M40 63 l7 7 14 -15' fill='none' stroke='%231d4ed8' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="InsuGuide">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#ffffff; --ink:#1f2a37; --muted:#64748b;
+    --line:#e2e8f0; --brand:#2563eb; --brand-d:#1d4ed8;
+    --ok:#047857; --ok-bg:#ecfdf5; --warn:#b45309; --warn-bg:#fffbeb;
+    --danger:#b91c1c; --danger-bg:#fef2f2; --result:#0f172a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.45}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;
+         display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+  header h1{font-size:17px;margin:0;font-weight:650}
+  .spacer{flex:1}
+  .unit-toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .unit-toggle button{border:0;background:#fff;padding:7px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+  .unit-toggle button.active{background:var(--brand);color:#fff}
+  .wrap{max-width:860px;margin:0 auto;padding:18px}
+  .tabs{display:flex;gap:8px;margin-bottom:16px}
+  .tabs button{flex:1;padding:11px;border:1px solid var(--line);background:#fff;border-radius:10px;
+               font-size:14px;font-weight:600;cursor:pointer;color:var(--muted)}
+  .tabs button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+  h2{font-size:15px;margin:0 0 12px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+  input,select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:#fff}
+  input:focus,select:focus{outline:2px solid var(--brand);border-color:var(--brand)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .btn{width:100%;padding:13px;border:0;border-radius:11px;background:var(--brand);color:#fff;
+       font-size:16px;font-weight:650;cursor:pointer;margin-top:6px}
+  .btn:hover{background:var(--brand-d)}
+  .btn.secondary{background:#eef2ff;color:var(--brand-d)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:7px 6px;text-align:center;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  td:first-child,th:first-child{text-align:left;font-weight:600}
+  table input{padding:7px 6px;font-size:14px;text-align:center;min-width:64px}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px}
+  .disclaimer{background:var(--warn-bg);border:1px solid #fde68a;color:#92400e;
+              border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:16px}
+  .result-box{border-radius:14px;padding:18px;text-align:center;margin-top:8px}
+  .result-box .big{font-size:44px;font-weight:750;line-height:1.1}
+  .result-box .sub{font-size:13px;color:var(--muted);margin-top:4px}
+  .breakdown{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;font-size:14px}
+  .breakdown .row{display:flex;justify-content:space-between;padding:3px 0}
+  .breakdown .row.total{font-weight:700;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+  .alert{border-radius:11px;padding:11px 13px;font-size:13px;margin-top:10px;font-weight:500}
+  .alert.warn{background:var(--warn-bg);border:1px solid #fde68a;color:#92400e}
+  .alert.danger{background:var(--danger-bg);border:1px solid #fecaca;color:var(--danger)}
+  .alert.ok{background:var(--ok-bg);border:1px solid #a7f3d0;color:var(--ok)}
+  .muted{color:var(--muted);font-size:12px}
+  .saved{color:var(--ok);font-size:13px;font-weight:600;opacity:0;transition:opacity .3s}
+  .saved.show{opacity:1}
+  @media(max-width:560px){.result-box .big{font-size:38px}.wrap{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+  <svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true" style="flex:none">
+    <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs>
+    <rect width="100" height="100" rx="24" fill="url(#hg)"/>
+    <path d="M50 20 C50 20 73 46 73 63 A23 23 0 1 1 27 63 C27 46 50 20 50 20 Z" fill="#fff"/>
+    <path d="M40 63 l7 7 14 -15" fill="none" stroke="#1d4ed8" stroke-width="6"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <h1>Insu<span style="color:var(--brand)">Guide</span></h1>
+  <span class="muted">Prototyp</span>
+  <div class="spacer"></div>
+  <div class="unit-toggle" id="unitToggle">
+    <button data-unit="mgdl" class="active">mg/dl</button>
+    <button data-unit="mmol">mmol/l</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="disclaimer">
+    <strong>Wichtiger Hinweis:</strong> Dieser Prototyp ist ein Rechenhilfsmittel zur Demonstration und
+    <u>kein zugelassenes Medizinprodukt</u>. Die ausgegebene Menge ersetzt keine ärztliche Entscheidung.
+    Dosierungen immer mit der behandelnden Ärztin / dem behandelnden Arzt abstimmen und vor jeder Gabe prüfen.
+  </div>
+
+  <div class="tabs">
+    <button id="tabPatient" class="active" onclick="showTab('patient')">Patient</button>
+    <button id="tabTherapist" onclick="showTab('therapist')">Therapeut</button>
+  </div>
+
+  <!-- ============ PATIENT ============ -->
+  <section id="patient">
+    <div class="card">
+      <h2>Eingabe</h2>
+      <div class="grid2">
+        <div>
+          <label>Tageszeit</label>
+          <select id="pTz">
+            <option value="morgens">Morgens</option>
+            <option value="mittags">Mittags</option>
+            <option value="abends">Abends</option>
+            <option value="nachts">Nachts</option>
+          </select>
+        </div>
+        <div>
+          <label>Aktueller Blutzucker (<span class="uLabel">mg/dl</span>)</label>
+          <input id="pBz" type="number" step="any" inputmode="decimal" placeholder="z. B. 180">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label>Geplante Kohlenhydrate (BE)</label>
+        <input id="pBe" type="number" step="any" min="0" inputmode="decimal" placeholder="z. B. 4">
+      </div>
+      <button class="btn" onclick="calculate()">Insulinmenge berechnen</button>
+    </div>
+    <div id="output"></div>
+  </section>
+
+  <!-- ============ THERAPIST ============ -->
+  <section id="therapist" style="display:none">
+    <div class="card" id="therapistLock">
+      <h2>🔒 Geschützter Bereich</h2>
+      <p class="muted" style="margin-top:-4px">Der Therapeuten-Bereich ist passwortgeschützt.</p>
+      <div style="margin-top:10px">
+        <label>Passwort</label>
+        <input id="pwInput" type="password" autocomplete="off" placeholder="Passwort eingeben"
+               onkeydown="if(event.key==='Enter')unlockTherapist()">
+      </div>
+      <div id="pwError" class="alert danger" style="display:none;margin-top:10px">Falsches Passwort.</div>
+      <button class="btn" style="margin-top:12px" onclick="unlockTherapist()">Entsperren</button>
+    </div>
+
+    <div id="therapistContent" style="display:none">
+    <div class="card">
+      <h2>Therapieplan – Einstellungen pro Tageszeit</h2>
+      <p class="muted" style="margin-top:-4px">
+        Blutzucker-Werte in der aktuell gewählten Einheit (<span class="uLabel">mg/dl</span>).
+        Werte werden lokal im Browser gespeichert.
+      </p>
+      <div style="overflow-x:auto">
+        <table id="cfgTable">
+          <thead>
+            <tr>
+              <th>Tageszeit</th>
+              <th>Ziel&nbsp;Min</th>
+              <th>Ziel&nbsp;Max</th>
+              <th>Grundmenge<br>(IE)</th>
+              <th>BE-Faktor<br>(IE/BE)</th>
+              <th>Korrektur-Wert<br>(<span class="uLabel">mg/dl</span>/IE)</th>
+              <th>Korrektur-<br>faktor</th>
+            </tr>
+          </thead>
+          <tbody id="cfgBody"></tbody>
+        </table>
+      </div>
+      <div class="hint">
+        <strong>Formel:</strong> Insulin = Grundmenge + (BE × BE-Faktor) +
+        <em>Korrektur</em>, mit Korrektur = ((BZ − Ziel&nbsp;Max) ÷ Korrektur-Wert) × Korrekturfaktor.
+        Ergebnis nie unter 0 IE, gerundet auf 0,5 IE. Liegt der BZ unter Ziel&nbsp;Min, erscheint eine Hypo-Warnung.
+      </div>
+      <div style="margin-top:16px;max-width:280px">
+        <label>Maximaldosis pro Gabe (Sicherheitsgrenze, IE)</label>
+        <input id="cfgMaxDose" type="number" step="any" min="0" placeholder="z. B. 20">
+        <div class="hint" style="margin-top:6px">Übersteigt die berechnete Menge diesen Wert, wird sie gedeckelt und deutlich gewarnt. Leer/0 = keine Grenze.</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+        <button class="btn" style="width:auto;padding:11px 20px" onclick="saveCfg()">Speichern</button>
+        <button class="btn secondary" style="width:auto;padding:11px 20px" onclick="resetCfg()">Beispielwerte laden</button>
+        <span id="savedMsg" class="saved">✓ gespeichert</span>
+      </div>
+    </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- Konstanten ---------- */
+const MMOL = 18.0182;              // 1 mmol/l = 18.0182 mg/dl
+const TZ = ["morgens","mittags","abends","nachts"];
+const TZ_LABEL = {morgens:"Morgens",mittags:"Mittags",abends:"Abends",nachts:"Nachts"};
+
+// Beispiel-Startwerte (alle BZ-Werte in mg/dl gespeichert). Vom Therapeuten anzupassen.
+const DEFAULTS = {
+  morgens:{min:100,max:140,grund:0,be:2.0,kwert:30,kfak:2.0},
+  mittags:{min:100,max:140,grund:0,be:1.0,kwert:40,kfak:1.0},
+  abends: {min:100,max:140,grund:0,be:1.5,kwert:40,kfak:1.5},
+  nachts: {min:120,max:160,grund:0,be:1.0,kwert:50,kfak:1.0},
+};
+
+const MAXDOSE_DEFAULT = 20;   // Sicherheits-Obergrenze (IE), vom Therapeuten anpassbar
+let unit = "mgdl";
+let cfg = loadCfg();
+
+/* ---------- Einheiten-Helfer ---------- */
+// BZ-Domänenwert (mg/dl intern) -> Anzeige in aktueller Einheit
+function toDisp(mgdl){
+  if(mgdl===null||mgdl===undefined||isNaN(mgdl)) return "";
+  return unit==="mmol" ? round1(mgdl/MMOL) : mgdl;
+}
+// Anzeigewert (aktuelle Einheit) -> mg/dl intern
+function fromDisp(v){
+  v = parseFloat(v);
+  if(isNaN(v)) return NaN;
+  return unit==="mmol" ? v*MMOL : v;
+}
+function round1(x){ return Math.round(x*10)/10; }
+function roundHalf(x){ return Math.round(x*2)/2; }  // auf 0,5 IE
+
+/* ---------- Kernberechnung (immer in mg/dl) ---------- */
+// Reine, testbare Funktion. Gibt Aufschlüsselung + Warnungen zurück.
+function computeDose({bzMgdl, be, p}){
+  const essen = be * p.be;
+  const korrekturRaw = ((bzMgdl - p.max) / p.kwert) * p.kfak;
+  const totalRaw = p.grund + essen + korrekturRaw;
+  const total = Math.max(0, totalRaw);
+  const rounded = roundHalf(total);
+  return {essen, korrekturRaw, grund:p.grund, totalRaw, total, rounded};
+}
+
+/* ---------- Speicherung ---------- */
+function loadCfg(){
+  try{
+    const raw = localStorage.getItem("insulinCfg");
+    if(raw){ const o = JSON.parse(raw); // Vollständigkeit sichern
+      TZ.forEach(t=>{ o[t] = Object.assign({}, DEFAULTS[t], o[t]||{}); });
+      if(typeof o.maxDose!=="number") o.maxDose = MAXDOSE_DEFAULT;
+      return o;
+    }
+  }catch(e){}
+  const d = JSON.parse(JSON.stringify(DEFAULTS));
+  d.maxDose = MAXDOSE_DEFAULT;
+  return d;
+}
+function saveCfg(){
+  readCfgFromInputs();
+  localStorage.setItem("insulinCfg", JSON.stringify(cfg));
+  const m = document.getElementById("savedMsg");
+  m.classList.add("show"); setTimeout(()=>m.classList.remove("show"),1500);
+}
+function resetCfg(){
+  cfg = JSON.parse(JSON.stringify(DEFAULTS));
+  cfg.maxDose = MAXDOSE_DEFAULT;
+  renderCfg();
+  localStorage.setItem("insulinCfg", JSON.stringify(cfg));
+}
+
+/* ---------- Therapeuten-Tabelle rendern / lesen ---------- */
+function renderCfg(){
+  const body = document.getElementById("cfgBody");
+  body.innerHTML = "";
+  TZ.forEach(t=>{
+    const p = cfg[t];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${TZ_LABEL[t]}</td>
+      <td><input data-t="${t}" data-f="min"   type="number" step="any" value="${toDisp(p.min)}"></td>
+      <td><input data-t="${t}" data-f="max"   type="number" step="any" value="${toDisp(p.max)}"></td>
+      <td><input data-t="${t}" data-f="grund" type="number" step="any" value="${p.grund}"></td>
+      <td><input data-t="${t}" data-f="be"    type="number" step="any" value="${p.be}"></td>
+      <td><input data-t="${t}" data-f="kwert" type="number" step="any" value="${toDisp(p.kwert)}"></td>
+      <td><input data-t="${t}" data-f="kfak"  type="number" step="any" value="${p.kfak}"></td>`;
+    body.appendChild(tr);
+  });
+  document.getElementById("cfgMaxDose").value = cfg.maxDose>0 ? cfg.maxDose : "";
+}
+function readCfgFromInputs(){
+  document.querySelectorAll("#cfgBody input").forEach(inp=>{
+    const t=inp.dataset.t, f=inp.dataset.f, v=parseFloat(inp.value);
+    if(isNaN(v)) return;
+    if(f==="min"||f==="max"||f==="kwert") cfg[t][f]=fromDisp(v); // BZ-Domäne -> mg/dl
+    else cfg[t][f]=v;
+  });
+  const md=parseFloat(document.getElementById("cfgMaxDose").value);
+  cfg.maxDose = isNaN(md) ? 0 : md;
+}
+
+/* ---------- Patientenberechnung + Ausgabe ---------- */
+function calculate(){
+  const out = document.getElementById("output");
+  const t   = document.getElementById("pTz").value;
+  const bzIn= document.getElementById("pBz").value;
+  const beIn= document.getElementById("pBe").value;
+
+  const bzMgdl = fromDisp(bzIn);
+  const be = parseFloat(beIn);
+
+  if(isNaN(bzMgdl)){ out.innerHTML = alertBox("danger","Bitte einen gültigen Blutzucker eingeben."); return; }
+  if(isNaN(be) || be<0){ out.innerHTML = alertBox("danger","Bitte eine gültige BE-Menge (0 oder mehr) eingeben."); return; }
+
+  const p = cfg[t];
+  const r = computeDose({bzMgdl, be, p});
+
+  // Deckelung auf Maximaldosis (Sicherheitsgrenze)
+  const cap = cfg.maxDose>0 ? cfg.maxDose : 0;
+  let finalDose = r.rounded, capped = false;
+  if(cap>0 && r.rounded>cap){ finalDose = cap; capped = true; }
+
+  // Warnungen (Schwellen intern in mg/dl, Anzeige in gewählter Einheit)
+  const U = unitLabel();
+  let alerts = "";
+  if(capped){
+    alerts += alertBox("danger","⚠ Berechnete Menge ("+fmtIE(r.rounded)+" IE) überschreitet die eingestellte Maximaldosis von "+fmtIE(cap)+" IE und wurde begrenzt. Bitte ärztliche Rücksprache halten.");
+  }
+  if(bzMgdl < 70){
+    alerts += alertBox("danger","⚠ Unterzucker (unter "+fmtBz(70)+" "+U+"). Zuerst schnelle Kohlenhydrate zu sich nehmen, kein Korrekturinsulin ohne ärztliche Rücksprache.");
+  } else if(bzMgdl < p.min){
+    alerts += alertBox("warn","⚠ Blutzucker unter dem Zielbereich (unter "+fmtBz(p.min)+" "+U+"). Hypo-Gefahr – Menge wurde reduziert. Vor der Gabe prüfen, ggf. erst essen.");
+  }
+  if(bzMgdl > 250){
+    alerts += alertBox("warn","⚠ Stark erhöhter Blutzucker (über "+fmtBz(250)+" "+U+"). An Keton-Kontrolle denken und ärztliche Empfehlungen beachten.");
+  }
+  if(r.totalRaw < 0){
+    alerts += alertBox("warn","Rechnerische Menge lag unter 0 und wurde auf 0 IE begrenzt.");
+  }
+
+  out.innerHTML = `
+    <div class="card">
+      <div class="result-box" style="background:${capped?'var(--danger-bg)':(finalDose>0?'var(--ok-bg)':'var(--warn-bg)')}">
+        <div class="big">${fmtIE(finalDose)} IE</div>
+        <div class="sub">empfohlene Insulinmenge · ${TZ_LABEL[t]}</div>
+      </div>
+      ${alerts}
+      <div class="breakdown">
+        <div class="row"><span>Grundmenge</span><span>${fmtIE(r.grund)} IE</span></div>
+        <div class="row"><span>Essen (${fmtNum(be)} BE × ${fmtNum(p.be)})</span><span>${fmtIE(r.essen)} IE</span></div>
+        <div class="row"><span>Korrektur ((${fmtBz(bzMgdl)} − ${fmtBz(p.max)}) ÷ ${fmtBz(p.kwert)} × ${fmtNum(p.kfak)})</span><span>${signIE(r.korrekturRaw)} IE</span></div>
+        <div class="row total"><span>Summe (vor Rundung)</span><span>${fmtIE(Math.max(0,r.totalRaw))} IE</span></div>
+        <div class="row total"><span>Gerundet (0,5 IE)</span><span>${fmtIE(r.rounded)} IE</span></div>
+        ${capped?`<div class="row total"><span>Begrenzt auf Maximaldosis</span><span>${fmtIE(finalDose)} IE</span></div>`:''}
+      </div>
+      <p class="muted" style="margin-top:12px">Zielbereich ${TZ_LABEL[t]}: ${fmtBz(p.min)}–${fmtBz(p.max)} ${unitLabel()}. Bitte vor der Gabe ärztlich bestätigen lassen.</p>
+    </div>`;
+}
+
+/* ---------- Formatierung ---------- */
+function unitLabel(){ return unit==="mmol"?"mmol/l":"mg/dl"; }
+function fmtNum(x){ return (Math.round(x*100)/100).toString().replace(".",","); }
+function fmtIE(x){ return fmtNum(Math.round(x*10)/10); }
+function signIE(x){ const v=Math.round(x*10)/10; return (v>0?"+":"")+fmtNum(v); }
+function fmtBz(mgdl){ return fmtNum(toDisp(mgdl)); }
+function alertBox(type,msg){ return `<div class="alert ${type}">${msg}</div>`; }
+
+/* ---------- Passwortschutz Therapeuten-Bereich ---------- */
+// SHA-256-Hash des Passworts (Klartext steht NICHT in der Datei).
+const PW_HASH = "02105da5381bc034754a2c3734fd65a4916f82a66343483bd22934b03cc6cdd7";
+let therapistUnlocked = false;
+
+async function sha256(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function unlockTherapist(){
+  const inp = document.getElementById("pwInput");
+  const err = document.getElementById("pwError");
+  const hash = await sha256(inp.value);
+  if(hash === PW_HASH){
+    therapistUnlocked = true;
+    inp.value = "";
+    err.style.display = "none";
+    applyTherapistLockUI();
+    renderCfg();
+  }else{
+    err.style.display = "block";
+    inp.select();
+  }
+}
+function applyTherapistLockUI(){
+  document.getElementById("therapistLock").style.display    = therapistUnlocked?"none":"";
+  document.getElementById("therapistContent").style.display = therapistUnlocked?"":"none";
+}
+
+/* ---------- Tabs & Einheit ---------- */
+function showTab(which){
+  // Sicherheit: Beim Verlassen des Therapeuten-Bereichs immer wieder sperren,
+  // damit er beim nächsten Öffnen erneut das Passwort verlangt (Patient darf nicht offen finden).
+  if(which!=="therapist") therapistUnlocked = false;
+  document.getElementById("patient").style.display   = which==="patient"?"":"none";
+  document.getElementById("therapist").style.display = which==="therapist"?"":"none";
+  document.getElementById("tabPatient").classList.toggle("active", which==="patient");
+  document.getElementById("tabTherapist").classList.toggle("active", which==="therapist");
+  if(which==="therapist"){
+    applyTherapistLockUI();
+    if(therapistUnlocked) renderCfg();
+    else document.getElementById("pwInput").focus();
+  }
+}
+document.getElementById("unitToggle").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  const therapistOpen = document.getElementById("therapist").style.display!=="none" && therapistUnlocked;
+  // Vor dem Wechsel evtl. offene Therapeuten-Eingaben übernehmen
+  if(therapistOpen) readCfgFromInputs();
+  unit = b.dataset.unit;
+  document.querySelectorAll("#unitToggle button").forEach(x=>x.classList.toggle("active",x===b));
+  document.querySelectorAll(".uLabel").forEach(x=>x.textContent=unitLabel());
+  if(therapistOpen) renderCfg();
+  document.getElementById("output").innerHTML="";
+});
+
+/* ---------- Init ---------- */
+document.querySelectorAll(".uLabel").forEach(x=>x.textContent=unitLabel());
+
+/* ---------- PWA: Service Worker (nur über http/https, z. B. GitHub Pages) ---------- */
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("sw.js").catch(()=>{/* offline-Modus optional */});
+  });
+}
+</script>
+</body>
+</html>
