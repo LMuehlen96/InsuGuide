@@ -12,10 +12,20 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root{
-    --bg:#f4f6f9; --card:#ffffff; --ink:#1f2a37; --muted:#64748b;
+    --bg:#f4f6f9; --card:#ffffff; --field:#ffffff; --ink:#1f2a37; --muted:#64748b;
     --line:#e2e8f0; --brand:#2563eb; --brand-d:#1d4ed8;
-    --ok:#047857; --ok-bg:#ecfdf5; --warn:#b45309; --warn-bg:#fffbeb;
-    --danger:#b91c1c; --danger-bg:#fef2f2; --result:#0f172a;
+    --ok:#047857; --ok-bg:#ecfdf5; --ok-line:#a7f3d0;
+    --warn:#92400e; --warn-bg:#fffbeb; --warn-line:#fde68a;
+    --danger:#b91c1c; --danger-bg:#fef2f2; --danger-line:#fecaca; --result:#0f172a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f172a; --card:#1e293b; --field:#0b1220; --ink:#e5e9f0; --muted:#94a3b8;
+      --line:#334155; --brand:#3b82f6; --brand-d:#60a5fa;
+      --ok:#6ee7b7; --ok-bg:#083f34; --ok-line:#065f46;
+      --warn:#fcd34d; --warn-bg:#3a2a06; --warn-line:#78591a;
+      --danger:#fca5a5; --danger-bg:#3a1414; --danger-line:#7f1d1d; --result:#e5e9f0;
+    }
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -25,17 +35,17 @@
   header h1{font-size:17px;margin:0;font-weight:650}
   .spacer{flex:1}
   .unit-toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-  .unit-toggle button{border:0;background:#fff;padding:7px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+  .unit-toggle button{border:0;background:var(--card);padding:7px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
   .unit-toggle button.active{background:var(--brand);color:#fff}
   .wrap{max-width:860px;margin:0 auto;padding:18px}
   .tabs{display:flex;gap:8px;margin-bottom:16px}
-  .tabs button{flex:1;padding:11px;border:1px solid var(--line);background:#fff;border-radius:10px;
+  .tabs button{flex:1;padding:11px;border:1px solid var(--line);background:var(--card);border-radius:10px;
                font-size:14px;font-weight:600;cursor:pointer;color:var(--muted)}
-  .tabs button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tabs button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
   h2{font-size:15px;margin:0 0 12px}
   label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
-  input,select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:#fff}
+  input,select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:var(--field);color:var(--ink)}
   input:focus,select:focus{outline:2px solid var(--brand);border-color:var(--brand)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .btn{width:100%;padding:13px;border:0;border-radius:11px;background:var(--brand);color:#fff;
@@ -48,7 +58,7 @@
   td:first-child,th:first-child{text-align:left;font-weight:600}
   table input{padding:7px 6px;font-size:14px;text-align:center;min-width:64px}
   .hint{font-size:12px;color:var(--muted);margin-top:8px}
-  .disclaimer{background:var(--warn-bg);border:1px solid #fde68a;color:#92400e;
+  .disclaimer{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn);
               border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:16px}
   .result-box{border-radius:14px;padding:18px;text-align:center;margin-top:8px}
   .result-box .big{font-size:44px;font-weight:750;line-height:1.1}
@@ -57,9 +67,9 @@
   .breakdown .row{display:flex;justify-content:space-between;padding:3px 0}
   .breakdown .row.total{font-weight:700;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
   .alert{border-radius:11px;padding:11px 13px;font-size:13px;margin-top:10px;font-weight:500}
-  .alert.warn{background:var(--warn-bg);border:1px solid #fde68a;color:#92400e}
-  .alert.danger{background:var(--danger-bg);border:1px solid #fecaca;color:var(--danger)}
-  .alert.ok{background:var(--ok-bg);border:1px solid #a7f3d0;color:var(--ok)}
+  .alert.warn{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn)}
+  .alert.danger{background:var(--danger-bg);border:1px solid var(--danger-line);color:var(--danger)}
+  .alert.ok{background:var(--ok-bg);border:1px solid var(--ok-line);color:var(--ok)}
   .muted{color:var(--muted);font-size:12px}
   .saved{color:var(--ok);font-size:13px;font-weight:600;opacity:0;transition:opacity .3s}
   .saved.show{opacity:1}
@@ -156,7 +166,6 @@
               <th>Grundmenge<br>(IE)</th>
               <th>BE-Faktor<br>(IE/BE)</th>
               <th>Korrektur-Wert<br>(<span class="uLabel">mg/dl</span>/IE)</th>
-              <th>Korrektur-<br>faktor</th>
             </tr>
           </thead>
           <tbody id="cfgBody"></tbody>
@@ -164,7 +173,7 @@
       </div>
       <div class="hint">
         <strong>Formel:</strong> Insulin = Grundmenge + (BE × BE-Faktor) +
-        <em>Korrektur</em>, mit Korrektur = ((BZ − Ziel&nbsp;Max) ÷ Korrektur-Wert) × Korrekturfaktor.
+        <em>Korrektur</em>, mit Korrektur = (BZ − Ziel&nbsp;Max) ÷ Korrektur-Wert.
         Ergebnis nie unter 0 IE, gerundet auf 0,5 IE. Liegt der BZ unter Ziel&nbsp;Min, erscheint eine Hypo-Warnung.
       </div>
       <div style="margin-top:16px;max-width:280px">
@@ -190,10 +199,10 @@ const TZ_LABEL = {morgens:"Morgens",mittags:"Mittags",abends:"Abends",nachts:"Na
 
 // Beispiel-Startwerte (alle BZ-Werte in mg/dl gespeichert). Vom Therapeuten anzupassen.
 const DEFAULTS = {
-  morgens:{min:100,max:140,grund:0,be:2.0,kwert:30,kfak:2.0},
-  mittags:{min:100,max:140,grund:0,be:1.0,kwert:40,kfak:1.0},
-  abends: {min:100,max:140,grund:0,be:1.5,kwert:40,kfak:1.5},
-  nachts: {min:120,max:160,grund:0,be:1.0,kwert:50,kfak:1.0},
+  morgens:{min:100,max:140,grund:0,be:2.0,kwert:30},
+  mittags:{min:100,max:140,grund:0,be:1.0,kwert:40},
+  abends: {min:100,max:140,grund:0,be:1.5,kwert:40},
+  nachts: {min:120,max:160,grund:0,be:1.0,kwert:50},
 };
 
 const MAXDOSE_DEFAULT = 20;   // Sicherheits-Obergrenze (IE), vom Therapeuten anpassbar
@@ -219,7 +228,7 @@ function roundHalf(x){ return Math.round(x*2)/2; }  // auf 0,5 IE
 // Reine, testbare Funktion. Gibt Aufschlüsselung + Warnungen zurück.
 function computeDose({bzMgdl, be, p}){
   const essen = be * p.be;
-  const korrekturRaw = ((bzMgdl - p.max) / p.kwert) * p.kfak;
+  const korrekturRaw = (bzMgdl - p.max) / p.kwert;
   const totalRaw = p.grund + essen + korrekturRaw;
   const total = Math.max(0, totalRaw);
   const rounded = roundHalf(total);
@@ -266,8 +275,7 @@ function renderCfg(){
       <td><input data-t="${t}" data-f="max"   type="number" step="any" value="${toDisp(p.max)}"></td>
       <td><input data-t="${t}" data-f="grund" type="number" step="any" value="${p.grund}"></td>
       <td><input data-t="${t}" data-f="be"    type="number" step="any" value="${p.be}"></td>
-      <td><input data-t="${t}" data-f="kwert" type="number" step="any" value="${toDisp(p.kwert)}"></td>
-      <td><input data-t="${t}" data-f="kfak"  type="number" step="any" value="${p.kfak}"></td>`;
+      <td><input data-t="${t}" data-f="kwert" type="number" step="any" value="${toDisp(p.kwert)}"></td>`;
     body.appendChild(tr);
   });
   document.getElementById("cfgMaxDose").value = cfg.maxDose>0 ? cfg.maxDose : "";
@@ -332,7 +340,7 @@ function calculate(){
       <div class="breakdown">
         <div class="row"><span>Grundmenge</span><span>${fmtIE(r.grund)} IE</span></div>
         <div class="row"><span>Essen (${fmtNum(be)} BE × ${fmtNum(p.be)})</span><span>${fmtIE(r.essen)} IE</span></div>
-        <div class="row"><span>Korrektur ((${fmtBz(bzMgdl)} − ${fmtBz(p.max)}) ÷ ${fmtBz(p.kwert)} × ${fmtNum(p.kfak)})</span><span>${signIE(r.korrekturRaw)} IE</span></div>
+        <div class="row"><span>Korrektur ((${fmtBz(bzMgdl)} − ${fmtBz(p.max)}) ÷ ${fmtBz(p.kwert)})</span><span>${signIE(r.korrekturRaw)} IE</span></div>
         <div class="row total"><span>Summe (vor Rundung)</span><span>${fmtIE(Math.max(0,r.totalRaw))} IE</span></div>
         <div class="row total"><span>Gerundet (0,5 IE)</span><span>${fmtIE(r.rounded)} IE</span></div>
         ${capped?`<div class="row total"><span>Begrenzt auf Maximaldosis</span><span>${fmtIE(finalDose)} IE</span></div>`:''}
